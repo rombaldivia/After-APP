@@ -1,113 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../widgets/neon_background.dart';
 import '../../../widgets/neon_card.dart';
 import '../../../neon_theme.dart';
-import '../presentation/nfc_providers.dart';
+import '../data/nfc_service.dart';
 
-class NfcRegisterPage extends ConsumerStatefulWidget {
+class NfcRegisterPage extends StatefulWidget {
   const NfcRegisterPage({super.key});
 
   @override
-  ConsumerState<NfcRegisterPage> createState() => _NfcRegisterPageState();
+  State<NfcRegisterPage> createState() => _NfcRegisterPageState();
 }
 
-class _NfcRegisterPageState extends ConsumerState<NfcRegisterPage> {
-  String? cardId;
-  String? linkedUserId;
-  Map<String, dynamic>? userData;
+class _NfcRegisterPageState extends State<NfcRegisterPage> {
+  final _nfc = NfcService();
+  final _nameCtrl = TextEditingController();
 
-  bool busy = false;
-  String? errorMsg;
+  bool _busy = false;
+  String? _cardId;
+  String? _error;
 
-  final nameCtrl = TextEditingController();
-
-  Future<void> scan() async {
+  Future<void> _scan() async {
     setState(() {
-      busy = true;
-      errorMsg = null;
-      cardId = null;
-      linkedUserId = null;
-      userData = null;
+      _busy = true;
+      _error = null;
     });
 
-    final nfc = ref.read(nfcServiceProvider);
-    final available = await nfc.isEnabled();
-    if (!available) {
-      setState(() {
-        busy = false;
-        errorMsg = 'NFC no disponible en este dispositivo.';
-      });
-      return;
+    try {
+      final result = await _nfc.scanOnce();
+
+      if (!mounted) return;
+
+      if (result == null || result.uidHex == null) {
+        setState(() {
+          _error = "No se pudo leer la tarjeta.";
+        });
+      } else {
+        setState(() {
+          _cardId = result.uidHex;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Tarjeta leída: ${result.uidHex}")),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = "Error NFC: $e");
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
-
-    final id = await nfc.scanOnce();
-    if (!mounted) return;
-
-    if (id == null || id.trim().isEmpty) {
-      setState(() {
-        busy = false;
-        errorMsg = 'No se detectó tarjeta.';
-      });
-      return;
-    }
-
-    final cards = ref.read(cardRepoProvider);
-    final users = ref.read(userRepoProvider);
-
-    final uid = await cards.getUserIdForCard(id);
-    Map<String, dynamic>? data;
-    if (uid != null) {
-      data = await users.getUser(uid);
-    }
-
-    setState(() {
-      busy = false;
-      cardId = id;
-      linkedUserId = uid;
-      userData = data;
-    });
   }
 
-  Future<void> createAndLink() async {
-    final id = cardId;
-    if (id == null) return;
+  Future<void> _register() async {
+    final id = _cardId;
+    final name = _nameCtrl.text.trim();
 
-    final name = nameCtrl.text.trim();
+    if (id == null || id.isEmpty) {
+      setState(() => _error = "Primero escanea una tarjeta.");
+      return;
+    }
+
     if (name.isEmpty) {
-      setState(() => errorMsg = 'Pon el nombre del cliente.');
+      setState(() => _error = "Ingresa el nombre del usuario.");
       return;
     }
 
-    setState(() {
-      busy = true;
-      errorMsg = null;
-    });
-
-    final users = ref.read(userRepoProvider);
-    final cards = ref.read(cardRepoProvider);
-
-    final newUserId = await users.createUser(displayName: name);
-    await cards.linkCardToUser(cardId: id, userId: newUserId);
-
-    final data = await users.getUser(newUserId);
-
-    setState(() {
-      busy = false;
-      linkedUserId = newUserId;
-      userData = data;
-    });
-  }
-
-  @override
-  void dispose() {
-    nameCtrl.dispose();
-    super.dispose();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Usuario $name registrado con tarjeta $id")),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final displayId = (_cardId == null || _cardId!.isEmpty)
+        ? "—"
+        : _cardId!;
+
     return Scaffold(
       body: NeonBackground(
         child: SafeArea(
@@ -118,64 +86,64 @@ class _NfcRegisterPageState extends ConsumerState<NfcRegisterPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('NFC • Registrar Tarjeta',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                  const Text(
+                    "Registrar Usuario NFC",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (_error != null) ...[
+                    Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Card ID: ",
+                          style: TextStyle(color: Colors.white70)),
+                      Text(displayId,
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                    ],
+                  ),
+
                   const SizedBox(height: 14),
 
-                  if (errorMsg != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Text(errorMsg!, style: const TextStyle(color: Colors.redAccent)),
-                    ),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: busy ? null : scan,
-                      icon: const Icon(Icons.nfc),
-                      label: Text(busy ? 'Escaneando...' : 'Escanear tarjeta'),
+                  TextField(
+                    controller: _nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: "Nombre del usuario",
+                      prefixIcon: Icon(Icons.person),
                     ),
                   ),
 
                   const SizedBox(height: 14),
 
-                  if (cardId != null) ...[
-                    Text('Card ID: $cardId',
-                        style: const TextStyle(color: Colors.white70), textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _busy ? null : _scan,
+                      icon: const Icon(Icons.nfc),
+                      label: Text(_busy ? "Escaneando..." : "Escanear Tarjeta"),
+                    ),
+                  ),
 
-                    if (linkedUserId != null && userData != null) ...[
-                      const Text('Tarjeta ya registrada ✅',
-                          style: TextStyle(fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 8),
-                      Text('${userData!['displayName'] ?? 'Sin nombre'}',
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-                      const SizedBox(height: 6),
-                      Text('Puntos: ${userData!['points'] ?? 0}',
-                          style: const TextStyle(color: Colors.white70)),
-                      Text('Nivel: ${userData!['tier'] ?? 'GOLD'}',
-                          style: const TextStyle(color: Colors.white70)),
-                    ] else ...[
-                      const Text('Tarjeta NO registrada',
-                          style: TextStyle(fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Nombre del cliente',
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: busy ? null : createAndLink,
-                          icon: const Icon(Icons.person_add),
-                          label: Text(busy ? 'Registrando...' : 'Crear usuario y asignar tarjeta'),
-                        ),
-                      ),
-                    ],
-                  ],
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _busy ? null : _register,
+                      icon: const Icon(Icons.save),
+                      label: const Text("Registrar Usuario"),
+                    ),
+                  ),
                 ],
               ),
             ),
