@@ -13,44 +13,18 @@ class AuthService {
 
   Stream<User?> authStateChanges() => _auth.authStateChanges();
 
-  Future<void> initGoogle() async {
-    await _google.initialize();
-  }
-
-  Future<UserCredential> signInWithGoogle() async {
-    await initGoogle();
-
-    if (!_google.supportsAuthenticate()) {
-      throw Exception('Plataforma no soporta GoogleSignIn.authenticate().');
-    }
-
-    // authenticate() devuelve el usuario (GoogleSignInAccount)
-    final user = await _google.authenticate();
-    if (user == null) {
-      throw Exception('Login cancelado');
-    }
-
-    final idToken = user.authentication.idToken;
-    if (idToken == null || idToken.isEmpty) {
-      throw Exception('No se pudo obtener idToken');
-    }
-
-    final authz = await user.authorizationClient.authorizeScopes(const ['email']);
-    final accessToken = authz.accessToken;
-
-    final credential = GoogleAuthProvider.credential(
-      idToken: idToken,
-      accessToken: accessToken,
-    );
-
-    return _auth.signInWithCredential(credential);
-  }
-
-  Future<UserCredential> signInWithEmail(String email, String password) {
+  // --- EMAIL/PASSWORD ---
+  Future<UserCredential> signInWithEmail({
+    required String email,
+    required String password,
+  }) {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<UserCredential> registerWithEmail(String email, String password) {
+  Future<UserCredential> registerWithEmail({
+    required String email,
+    required String password,
+  }) {
     return _auth.createUserWithEmailAndPassword(email: email, password: password);
   }
 
@@ -58,12 +32,30 @@ class AuthService {
     return _auth.sendPasswordResetEmail(email: email);
   }
 
+  // --- GOOGLE SIGN-IN (google_sign_in 7.x) ---
+  Future<void> initGoogle() async {
+    await _google.initialize();
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    await initGoogle();
+
+    try {
+      final account = await _google.authenticate();
+      final auth = account.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: auth.idToken,
+      );
+
+      return await _auth.signInWithCredential(credential);
+    } catch (e) {
+      throw Exception('Login Google falló: $e');
+    }
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
-    try {
-      await _google.disconnect();
-    } catch (_) {
-      await _google.signOut();
-    }
+    await _google.signOut();
   }
 }

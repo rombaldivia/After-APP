@@ -18,19 +18,34 @@ class QrScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("BOLICHE XTREMO", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                  const Text(
+                    "BOLICHE XTREMO",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
                   const SizedBox(height: 10),
-                  const Text("Ana Pérez", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                  const Text(
+                    "Ana Pérez",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Text("Nivel: ", style: TextStyle(color: Colors.white70)),
-                      Text("GOLD", style: TextStyle(fontWeight: FontWeight.w800, color: Colors.amber)),
+                      Text(
+                        "GOLD",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.amber,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Text("1,250", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "1,250",
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
                   const Text("Puntos", style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 18),
                   Container(

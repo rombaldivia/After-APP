@@ -42,7 +42,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         title: const Text('BOLICHE XTREMO'),
         actions: [
           IconButton(
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () => ref.read(authServiceProvider).signOut(),
             icon: const Icon(Icons.logout),
           ),
         ],

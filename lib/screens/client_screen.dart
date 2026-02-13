@@ -20,17 +20,29 @@ class ClientScreen extends StatelessWidget {
                 children: [
                   const Text("Cliente", style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 10),
-                  const Text("Ana Pérez", style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                  const Text(
+                    "Ana Pérez",
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Text("Nivel: ", style: TextStyle(color: Colors.white70)),
-                      Text("GOLD", style: TextStyle(fontWeight: FontWeight.w800, color: Colors.amber)),
+                      Text(
+                        "GOLD",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.amber,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text("1,250", style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "1,250",
+                    style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  ),
                   const Text("Puntos", style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 18),
                   SizedBox(

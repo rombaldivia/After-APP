@@ -13,7 +13,7 @@ class NeonBackground extends StatelessWidget {
           center: Alignment.topCenter,
           radius: 1.5,
           colors: [
-            Color(0xFF1B1336),
+            NeonTheme.neonPurple,
             NeonTheme.bg,
           ],
         ),

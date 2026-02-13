@@ -5,7 +5,11 @@ class NeonCard extends StatelessWidget {
   final Widget child;
   final Color glowColor;
 
-  const NeonCard({super.key, required this.child, required this.glowColor});
+  const NeonCard({
+    super.key,
+    required this.child,
+    required this.glowColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +26,8 @@ class NeonCard extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: glowColor.withValues(alpha: 0.35),
-          width: 1.2,
+          color: glowColor.withValues(alpha: 0.25),
+          width: 1,
         ),
       ),
       child: child,
