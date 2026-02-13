@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "557680284777",
+    "project_id": "after-dc01f",
+    "storage_bucket": "after-dc01f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557680284777:android:83efce05c6060ecffd3ef8",
+        "android_client_info": {
+          "package_name": "com.arque.after"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "557680284777-ng24vq7rse3m47p156bhc8rpdv5dv616.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arque.after",
+            "certificate_hash": "5ada153637e74c20462fad38860295b9ec43d8f7"
+          }
+        },
+        {
+          "client_id": "557680284777-mn94n64lsbp243kkvb8uvi7oho23raa7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnk5jw4XHKw9jHSjQAKDaDb2vBTHlxSdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "557680284777-mn94n64lsbp243kkvb8uvi7oho23raa7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

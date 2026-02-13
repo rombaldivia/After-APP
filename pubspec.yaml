@@ -1,0 +1,29 @@
+name: after
+description: "NFC Loyalty / Promoters App"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Firebase
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+
+  # State management
+  flutter_riverpod: ^2.5.1
+  google_sign_in: ^7.2.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
