@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(merchantId) {
+      return signedIn() && request.auth.uid == merchantId;
+    }
+
+    // Un negocio por usuario: merchantId = uid
+    match /merchants/{merchantId} {
+      allow read, write: if isOwner(merchantId);
+    }
+
+    match /promotions/{promoId} {
+      allow create: if signedIn() && request.resource.data.merchantId == request.auth.uid;
+      allow read, update, delete: if signedIn() && resource.data.merchantId == request.auth.uid;
+    }
+
+    match /customers/{customerId} {
+      allow create: if signedIn() && request.resource.data.merchantId == request.auth.uid;
+      allow read, update, delete: if signedIn() && resource.data.merchantId == request.auth.uid;
+    }
+
+    match /cards/{cardUidHex} {
+      allow create: if signedIn() && request.resource.data.merchantId == request.auth.uid;
+      allow read, update, delete: if signedIn() && resource.data.merchantId == request.auth.uid;
+    }
+
+    match /redemptions/{redemptionId} {
+      allow create: if signedIn() && request.resource.data.merchantId == request.auth.uid;
+      allow read: if signedIn() && resource.data.merchantId == request.auth.uid;
+      // Irreversible: no updates/deletes desde la app
+      allow update, delete: if false;
+    }
+
+    // (Legacy) affiliates, si aún lo usas en algo viejo:
+    match /affiliates/{docId} {
+      allow read, write: if signedIn();
+    }
+  }
+}

@@ -30,7 +30,7 @@ class _NfcRegisterPageState extends State<NfcRegisterPage> {
 
       if (!mounted) return;
 
-      if (result == null || result.uidHex == null) {
+      if (result.uidHex.isEmpty) {
         setState(() {
           _error = "No se pudo leer la tarjeta.";
         });
